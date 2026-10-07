@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Roblox Jinkls — Home / Games</title>
+    <style>
+        body { background-color: #191B1D; color: #FFFFFF; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+        .header { background-color: #2B2D30; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .logo { font-size: 24px; font-weight: bold; color: #00A2FF; letter-spacing: 1px; }
+        .user-tag { color: #00E676; font-weight: bold; font-size: 16px; }
+        .main-container { display: flex; justify-content: center; margin-top: 60px; }
+        .roblox-place-card { background-color: #2B2D30; width: 650px; border-radius: 8px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: flex; gap: 30px; }
+        .game-thumb { width: 220px; height: 220px; background-color: #191B1D; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #555; border: 1px solid #40444B; font-weight: bold; }
+        .game-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        h2 { margin: 0 0 10px 0; font-size: 28px; color: #FFF; }
+        .creator { color: #A0A0A0; font-size: 14px; margin-bottom: 20px; }
+        /* Знаменитая Зеленая Кнопка Запуска Roblox */
+        .btn-roblox-play { background-color: #00B060; color: white; border: none; padding: 15px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; transition: 0.1s; display: block; width: 100%; box-shadow: 0 4px 0 #008F4C; }
+        .btn-roblox-play:hover { background-color: #00C46B; }
+        .btn-roblox-play:active { transform: translateY(4px); box-shadow: none; }
+        
+        .auth-box { width: 320px; margin: 100px auto; background-color: #2B2D30; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 90%; padding: 10px; margin-bottom: 12px; border: 1px solid #40444B; background-color: #202225; color: white; border-radius: 4px; text-align: center; }
+        .auth-btn { width: 90%; padding: 10px; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 5px; color: white; }
+    </style>
+</head>
+<body>
+
+<!-- ЭКРАН АВТОРИЗАЦИИ (ЕСЛИ НЕ ВОШЕЛ) -->
+<div id="login-screen" class="auth-box">
+    <h2 style="color: #00A2FF;">JINKLS LOGIN</h2>
+    <input type="text" id="user" placeholder="Никнейм">
+    <input type="password" id="pass" placeholder="Пароль">
+    <button class="auth-btn" style="background-color: #00A2FF;" onclick="auth('/api/login')">Войти</button>
+    <button class="auth-btn" style="background-color: #4f545c;" onclick="auth('/api/register')">Регистрация</button>
+    <div id="err" style="color: #FF4D4D; margin-top: 15px; font-size: 14px;"></div>
+</div>
+
+<!-- ИГРОВОЙ ИНТЕРФЕЙС ROBLOX (ОТКРЫВАЕТСЯ ПОСЛЕ ВХОДА) -->
+<div id="game-screen" style="display: none;">
+    <div class="header">
+        <div class="logo">ROBLOX JINKLS</div>
+        <div class="user-tag" id="user-display">Привет, Игрок!</div>
+    </div>
+
+    <div class="main-container">
+        <div class="roblox-place-card">
+            <!-- Превью твоей карты Natural Disasters -->
+            <div class="game-thumb">💥 NATURAL DISASTERS</div>
+            <div class="game-info">
+                <div>
+                    <h2>Natural Disaster Survival [2020]</h2>
+                    <div class="creator">Создатель: <span style="color: #00A2FF; cursor:pointer;">JinklsCommunity</span></div>
+                    <p style="color: #D0D0D0; font-size: 14px; line-height: 1.5;">Выживайте среди разрушительных катаклизмов! Метеориты, цунами, торнадо и землетрясения на кастомной оффлайн-сборке Jinkls 2022 года.</p>
+                </div>
+                
+                <!-- Та самая ссылка, которая будит лаунчер в Windows и передает ему токен сессии -->
+                <a href="#" id="play-trigger" class="btn-roblox-play">▶ ИГРАТЬ</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function auth(endpoint) {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        const err = document.getElementById('err');
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+
+        if (data.success && data.token) {
+            // Скрываем вход, показываем оригинальный сайт
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('user-display').innerText = "👤 " + data.username;
+            
+            // Настраиваем зеленую кнопку PLAY на вызов URI-протокола нашего лаунчера!
+            document.getElementById('play-trigger').href = "jinkls-player://token=" + data.token;
+        } else {
+            err.innerText = data.error || data.message;
+        }
+    }
+</script>
+</body>
+</html>
